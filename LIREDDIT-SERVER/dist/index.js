@@ -5,13 +5,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@mikro-orm/core");
 const console_1 = __importDefault(require("console"));
-const Blog_1 = require("./entities/Blog");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
+const express_1 = __importDefault(require("express"));
+const apollo_server_express_1 = require("apollo-server-express");
+const type_graphql_1 = require("type-graphql");
+const hello_1 = require("./rersolvers/hello");
 const main = async () => {
     const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
     await orm.getMigrator().up();
-    const blogs = await orm.em.find(Blog_1.Blog, {});
-    console_1.default.log(blogs);
+    const app = (0, express_1.default)();
+    const apolloServer = new apollo_server_express_1.ApolloServer({
+        schema: await (0, type_graphql_1.buildSchema)({
+            resolvers: [hello_1.HelloResolver],
+            validate: false
+        })
+    });
+    await apolloServer.start();
+    apolloServer.applyMiddleware({ app });
+    app.listen(4000, () => {
+        console_1.default.log('server started on loocalhost:4000');
+    });
 };
 main().catch((err) => {
     console_1.default.error(err);
