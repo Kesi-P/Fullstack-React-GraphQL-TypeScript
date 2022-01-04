@@ -1,6 +1,6 @@
 //schema is a grapsql query functions
 import { Blog } from "../entities/Blog";
-import { Resolver, Query, Ctx, Arg, Int, Mutation } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation } from "type-graphql";
 import { Mycontext } from "../types";
 
 @Resolver()

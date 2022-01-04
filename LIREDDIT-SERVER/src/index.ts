@@ -7,6 +7,7 @@ import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./rersolvers/hello";
 import { BlogResolver } from "./rersolvers/blog";
+import { UserResolver } from "./rersolvers/user";
 
 const main = async () => {
     const orm = await MikroORM.init(microConfig);  
@@ -17,7 +18,7 @@ const main = async () => {
     
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [HelloResolver, BlogResolver],
+            resolvers: [HelloResolver, BlogResolver, UserResolver],
             validate: false
         }),
         //to excess object
