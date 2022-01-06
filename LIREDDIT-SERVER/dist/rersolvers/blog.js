@@ -16,30 +16,30 @@ exports.BlogResolver = void 0;
 const Blog_1 = require("../entities/Blog");
 const type_graphql_1 = require("type-graphql");
 let BlogResolver = class BlogResolver {
-    blogs(ctx) {
-        return ctx.em.find(Blog_1.Blog, {});
+    blogs({ em }) {
+        return em.find(Blog_1.Blog, {});
     }
-    blog(id, ctx) {
-        return ctx.em.findOne(Blog_1.Blog, { id });
+    blog(id, { em }) {
+        return em.findOne(Blog_1.Blog, { id });
     }
-    async createBlog(title, ctx) {
-        const blog = ctx.em.create(Blog_1.Blog, { title });
-        await ctx.em.persistAndFlush(blog);
+    async createBlog(title, { em }) {
+        const blog = em.create(Blog_1.Blog, { title });
+        await em.persistAndFlush(blog);
         return blog;
     }
-    async updateBlog(id, title, ctx) {
-        const blog = await ctx.em.findOne(Blog_1.Blog, { id });
+    async updateBlog(id, title, { em }) {
+        const blog = await em.findOne(Blog_1.Blog, { id });
         if (!blog) {
             return null;
         }
         if (typeof title !== 'undefined') {
             blog.title = title;
-            await ctx.em.persistAndFlush(blog);
+            await em.persistAndFlush(blog);
         }
         return blog;
     }
-    async deleteBlog(id, ctx) {
-        await ctx.em.nativeDelete(Blog_1.Blog, { id });
+    async deleteBlog(id, { em }) {
+        await em.nativeDelete(Blog_1.Blog, { id });
         return true;
     }
 };

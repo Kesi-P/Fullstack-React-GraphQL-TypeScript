@@ -1,7 +1,7 @@
 //schema is a grapsql query functions
 import { User } from "../entities/User";
 import { Mycontext } from "../types";
-import { Resolver, Mutation, Arg, Ctx, InputType, Field, ObjectType } from "type-graphql";
+import { Resolver, Mutation, Arg, Ctx, InputType, Field, ObjectType, Query } from "type-graphql";
 import passwordHash  from 'password-hash'
 
 @InputType()
@@ -30,26 +30,41 @@ class UserResponse {
 }
 @Resolver()
 export class UserResolver {
+
+    @Query(() => User, {nullable:true})
+    async me(@Ctx() {req, em}: Mycontext){
+        //not logged in
+        //console.log(req.session )
+        if( !req.session.userId){
+            return null
+        }
+        const user = await em.findOne(User, {id: req.session.userId})
+        return user
+    }
+
     @Mutation(() => User)
     async register(
         @Arg('usernameinput') username:string,
         @Arg('passswordinput') password:string,
-        @Ctx() ctx: Mycontext
+        @Ctx() {em, req}: Mycontext
         ) : Promise<User>
     {
         const hashPassword = await passwordHash.generate(password);
-        const user = ctx.em.create(User, { username , password:hashPassword})
-        await ctx.em.persistAndFlush(user);
+        const user = em.create(User, { username , password:hashPassword})
+        await em.persistAndFlush(user);
+        //also store user in the session same as logged in
+        //set a cookie on the user
+        req.session.userId = user.id;
         return user
     }
 
     @Mutation(() => UserResponse)
     async login(
         @Arg('options') options: UsernamePasswordInput,
-        @Ctx() ctx: Mycontext
+        @Ctx() {em, req}: Mycontext
         ) : Promise<UserResponse>
     {
-        const user = await ctx.em.findOne(User, {username: options.username})
+        const user = await em.findOne(User, {username: options.username})
         if (!user) {
             return {
                 errors: [
@@ -71,6 +86,10 @@ export class UserResolver {
                 ]
             }
         }
+        //! username gonna be definde
+        //store userid in userId session
+        req.session!.userId = user.id;
+        console.log(req.session.userId )
         return { user }
     }
 }
