@@ -68,8 +68,22 @@ let UserResolver = class UserResolver {
     }
     async register(username, password, { em, req }) {
         const hashPassword = await password_hash_1.default.generate(password);
-        const user = em.create(User_1.User, { username, password: hashPassword });
-        await em.persistAndFlush(user);
+        try {
+            const user = em.create(User_1.User, { username, password: hashPassword });
+            await em.persistAndFlush(user);
+        }
+        catch (err) {
+            if (err.code === "23505") {
+                return {
+                    errors: [
+                        {
+                            field: "username",
+                            message: "username already taken",
+                        }
+                    ]
+                };
+            }
+        }
         req.session.userId = user.id;
         return user;
     }
@@ -109,7 +123,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "me", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => User_1.User),
+    (0, type_graphql_1.Mutation)(() => UserResponse),
     __param(0, (0, type_graphql_1.Arg)('usernameinput')),
     __param(1, (0, type_graphql_1.Arg)('passswordinput')),
     __param(2, (0, type_graphql_1.Ctx)()),

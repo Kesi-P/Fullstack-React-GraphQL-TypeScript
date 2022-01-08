@@ -31,6 +31,12 @@ const main = async () => {
     const redisClient = redis.createClient()
 
     app.use(
+        cors({
+            origin:"http://loocalhost:3000",
+            credentials: true
+        })
+    )
+    app.use(
         session({
             name: 'kesi-cookies',
             store: new RedisStore({ 

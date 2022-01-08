@@ -42,16 +42,31 @@ export class UserResolver {
         return user
     }
 
-    @Mutation(() => User)
+    @Mutation(() => UserResponse)
     async register(
         @Arg('usernameinput') username:string,
         @Arg('passswordinput') password:string,
         @Ctx() {em, req}: Mycontext
-        ) : Promise<User>
+        ) : Promise<UserResponse>
     {
         const hashPassword = await passwordHash.generate(password);
-        const user = em.create(User, { username , password:hashPassword})
-        await em.persistAndFlush(user);
+        try {
+            const user = em.create(User, { username , password:hashPassword})
+            await em.persistAndFlush(user);
+        } catch (err) {
+            if(err.code === "23505"){
+                return {
+                    errors: [
+                        {
+                            field: "username",
+                            message: "username already taken",
+
+                        }
+                    ]
+                }
+            }
+        }
+        
         //also store user in the session same as logged in
         //set a cookie on the user
         req.session.userId = user.id;
