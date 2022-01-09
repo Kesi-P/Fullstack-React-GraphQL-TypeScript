@@ -32,8 +32,9 @@ const main = async () => {
 
     app.use(
         cors({
-            origin:"http://loocalhost:3000",
-            credentials: true
+            origin:"http://localhost:3000",
+            credentials: true,
+            
         })
     )
     app.use(

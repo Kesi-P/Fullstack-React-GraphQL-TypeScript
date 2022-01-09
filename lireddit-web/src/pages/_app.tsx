@@ -6,7 +6,7 @@ const client = createClient({
   url: "http://localhost:4000/graphql",
   fetchOptions: {
     credentials: "include",
-    mode:'no-cors'
+   // mode:'no-cors'
   }
 
 })

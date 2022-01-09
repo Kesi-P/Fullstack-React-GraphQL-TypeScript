@@ -23,8 +23,8 @@ const main = async () => {
     const RedisStore = require('connect-redis')(express_session_1.default);
     const redisClient = redis_1.default.createClient();
     app.use((0, cors_1.default)({
-        origin: "http://loocalhost:3000",
-        credentials: true
+        origin: "http://localhost:3000",
+        credentials: true,
     }));
     app.use((0, express_session_1.default)({
         name: 'kesi-cookies',
