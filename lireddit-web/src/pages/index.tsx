@@ -7,10 +7,13 @@ import {
   ListItem,
 } from '@chakra-ui/react'
 import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
+import { NavBar } from '../components/NavBar'
 
 
 const Index = () => (
-<h1>test</h1>
+<>
+<NavBar/>
+</>
 )
 
 export default Index

@@ -13,3 +13,6 @@ start redis server
 
 # Client-side
 npm run dev
+
+# GraphQl Code Generator-client side
+npm run gen
