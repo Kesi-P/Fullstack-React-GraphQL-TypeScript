@@ -2,7 +2,7 @@ import { ChakraProvider, ColorModeProvider } from '@chakra-ui/react'
 import { Provider, createClient, dedupExchange, fetchExchange } from 'urql'
 import { cacheExchange, QueryInput, Cache, query } from '@urql/exchange-graphcache'
 import theme from '../theme'
-import { LoginMutation, MeDocument, MeQuery, RegisterMutation } from '../generated/graphql'
+import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from '../generated/graphql'
 
 function betterUpdateQuery<Result, Query>(
   cache: Cache,
@@ -23,6 +23,15 @@ const client = createClient({
   exchanges: [dedupExchange, cacheExchange({
     updates: {
       Mutation: {
+        logout: (_result, args, cache, info) => {
+          betterUpdateQuery<LogoutMutation, MeQuery>(
+            cache,
+            { query: MeDocument },
+            _result,
+            //just only return, don't care if both mutation return the same value
+            () => ({ me: null})
+          )
+        },
         login: (_result, args, cache, info) => {
           //the user return are need to be the same (username/ updatedAt/ id)
           betterUpdateQuery<LoginMutation, MeQuery>(

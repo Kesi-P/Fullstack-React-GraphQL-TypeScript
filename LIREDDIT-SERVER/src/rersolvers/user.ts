@@ -3,6 +3,7 @@ import { User } from "../entities/User";
 import { Mycontext } from "../types";
 import { Resolver, Mutation, Arg, Ctx, InputType, Field, ObjectType, Query } from "type-graphql";
 import passwordHash  from 'password-hash'
+import { COOKIE_NAME } from "../constants";
 
 @InputType()
 class UsernamePasswordInput {
@@ -42,7 +43,7 @@ export class UserResolver {
         return user
     }
 
-    @Mutation(() => User, {nullable:true})
+    @Mutation(() => User)
     async register(
         @Arg('usernameinput') username:string,
         @Arg('passswordinput') password:string,
@@ -91,5 +92,21 @@ export class UserResolver {
         req.session!.userId = user.id;
         console.log(req.session.userId )
         return { user }
+    }
+
+    @Mutation(() => Boolean)
+    logout(@Ctx() {req, res}: Mycontext) {        
+        return new Promise((resolve) =>
+        req.session.destroy((err) => {
+          res.clearCookie(COOKIE_NAME)
+          
+            if(err) {
+                console.log(err);
+                resolve(false);
+                return
+            }
+            console.log("Cookie cleared");
+            resolve(true)
+        }))
     }
 }
