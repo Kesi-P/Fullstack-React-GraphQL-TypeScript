@@ -102,7 +102,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined, user?: { __typename?: 'User', username: string, createdAt: string } | null | undefined } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined, user?: { __typename?: 'User', username: string, updatedAt: string, id: number } | null | undefined } };
 
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String'];
@@ -110,7 +110,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, createdAt: string } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, updatedAt: string, id: number } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -127,7 +127,8 @@ export const LoginDocument = gql`
     }
     user {
       username
-      createdAt
+      updatedAt
+      id
     }
   }
 }
@@ -140,7 +141,8 @@ export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!) {
   register(passswordinput: $password, usernameinput: $username) {
     username
-    createdAt
+    updatedAt
+    id
   }
 }
     `;
