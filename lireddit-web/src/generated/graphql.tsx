@@ -120,6 +120,11 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, createdAt: string, id: number } };
 
+export type BlogsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BlogsQuery = { __typename?: 'Query', blogs: Array<{ __typename?: 'Blog', id: number, createdAt: string, updatedAt: string, title: string }> };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -168,6 +173,20 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const BlogsDocument = gql`
+    query Blogs {
+  blogs {
+    id
+    createdAt
+    updatedAt
+    title
+  }
+}
+    `;
+
+export function useBlogsQuery(options: Omit<Urql.UseQueryArgs<BlogsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<BlogsQuery>({ query: BlogsDocument, ...options });
 };
 export const MeDocument = gql`
     query Me {

@@ -6,14 +6,21 @@ import {
   ListIcon,
   ListItem,
 } from '@chakra-ui/react'
-import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
 import { NavBar } from '../components/NavBar'
+import { withUrqlClient } from 'next-urql';
+import { createUrqlClient } from '../utils/createUrqlCClient';
+import { useBlogsQuery } from '../generated/graphql';
 
 
-const Index = () => (
-<>
-<NavBar/>
-</>
-)
+const Index = () => {
 
-export default Index
+  const [{ data }] = useBlogsQuery()
+  return (
+    <>
+    <NavBar/>
+    { !data ? null : data.blogs.map((b) => <div key={b.id}>{b.title}</div>)}
+    </>
+  )
+}
+
+export default withUrqlClient(createUrqlClient, {ssr: true})(Index)
