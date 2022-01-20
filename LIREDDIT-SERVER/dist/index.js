@@ -14,7 +14,7 @@ const hello_1 = require("./rersolvers/hello");
 const blog_1 = require("./rersolvers/blog");
 const user_1 = require("./rersolvers/user");
 const apollo_server_core_1 = require("apollo-server-core");
-const redis_1 = __importDefault(require("redis"));
+const ioredis_1 = __importDefault(require("ioredis"));
 const express_session_1 = __importDefault(require("express-session"));
 const cors_1 = __importDefault(require("cors"));
 const main = async () => {
@@ -22,7 +22,7 @@ const main = async () => {
     await orm.getMigrator().up();
     const app = (0, express_1.default)();
     const RedisStore = require('connect-redis')(express_session_1.default);
-    const redisClient = redis_1.default.createClient();
+    const redis = new ioredis_1.default();
     app.use((0, cors_1.default)({
         origin: "http://localhost:3000",
         credentials: true,
@@ -30,7 +30,7 @@ const main = async () => {
     app.use((0, express_session_1.default)({
         name: constants_1.COOKIE_NAME,
         store: new RedisStore({
-            client: redisClient,
+            client: redis,
             disableTouch: true
         }),
         cookie: {
@@ -50,7 +50,7 @@ const main = async () => {
         plugins: [
             (0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)(),
         ],
-        context: ({ req, res }) => ({ em: orm.em, req, res })
+        context: ({ req, res }) => ({ em: orm.em, req, res, redis })
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({ app, cors: false });

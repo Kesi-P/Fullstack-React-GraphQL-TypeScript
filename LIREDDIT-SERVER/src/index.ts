@@ -10,12 +10,10 @@ import { BlogResolver } from "./rersolvers/blog";
 import { UserResolver } from "./rersolvers/user";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 
-import redis from 'redis'
 import Redis from 'ioredis'
 
 import session from 'express-session'
 import { Mycontext } from "./types";
-import connectRedis from 'connect-redis'
 import cors from 'cors'
 
 
@@ -28,7 +26,7 @@ const main = async () => {
     const app = express();
     
     const RedisStore = require('connect-redis')(session)
-    const redisClient = redis.createClient()
+    const redis = new Redis()
 
     app.use(
         cors({
@@ -41,7 +39,7 @@ const main = async () => {
         session({
             name: COOKIE_NAME,
             store: new RedisStore({ 
-                client: redisClient,
+                client: redis,
                 disableTouch: true    
             }),
             cookie: {
@@ -67,7 +65,7 @@ const main = async () => {
             ApolloServerPluginLandingPageGraphQLPlayground(),
           ],
         //to excess object, excess the seeion inside the resolver , this gonna send the arg to the resolver page
-        context: ({ req, res }): Mycontext => ({ em: orm.em, req, res })
+        context: ({ req, res }): Mycontext => ({ em: orm.em, req, res, redis })
     })
     //creata a graphql endpoint on express
     await apolloServer.start();
