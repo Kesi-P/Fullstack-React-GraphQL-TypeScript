@@ -66,6 +66,40 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    async changePassword(token, newPassword, { redis, em, req }) {
+        if (newPassword.length <= 2) {
+            return { errors: [
+                    {
+                        field: 'newPassword',
+                        message: 'Lenght must be greater than 2'
+                    }
+                ] };
+        }
+        const key = constants_1.FORGOT_PASSWORD + token;
+        const userId = await redis.get(key);
+        if (!userId) {
+            return { errors: [
+                    {
+                        field: 'token',
+                        message: 'Try another token'
+                    }
+                ] };
+        }
+        const user = await em.findOne(User_1.User, { id: parseInt(userId) });
+        if (!user) {
+            return { errors: [
+                    {
+                        field: 'token',
+                        message: 'user no longer exists'
+                    }
+                ] };
+        }
+        user.password = await password_hash_1.default.generate(newPassword);
+        await em.persistAndFlush(user);
+        await redis.del(key);
+        req.session.userId = user.id;
+        return { user };
+    }
     async forgotPassword(email, { em, redis }) {
         const user = await em.findOne(User_1.User, { email });
         if (!user) {
@@ -133,6 +167,15 @@ let UserResolver = class UserResolver {
         }));
     }
 };
+__decorate([
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Arg)('token')),
+    __param(1, (0, type_graphql_1.Arg)('newPassword')),
+    __param(2, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "changePassword", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Arg)("email")),

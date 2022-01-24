@@ -35,6 +35,49 @@ class UserResponse {
 }
 @Resolver()
 export class UserResolver {
+    @Mutation(() => UserResponse)
+    async changePassword(
+        @Arg('token') token: string,
+        @Arg('newPassword') newPassword: string,
+        @Ctx() {redis, em, req}: Mycontext
+    ): Promise<UserResponse> {
+        if (newPassword.length <= 2){
+            return { errors:[
+                {
+                    field: 'newPassword',
+                    message: 'Lenght must be greater than 2'
+                }
+            ]}
+        }
+        //checking if there is the right user by taking the token and checj on the redis.
+        const key = FORGOT_PASSWORD + token
+        const userId = await redis.get(key)
+        if(!userId){
+            return { errors:[
+                {
+                    field: 'token',
+                    message: 'Try another token'
+                }
+            ]}
+        }
+
+        const user = await em.findOne(User, {id: parseInt(userId)})
+        if(!user){
+            return { errors:[
+                {
+                    field: 'token',
+                    message: 'user no longer exists'
+                }
+            ]}
+        }
+        user.password = await passwordHash.generate(newPassword);
+        await em.persistAndFlush(user)
+
+        await redis.del(key)
+        //log in user after change password
+        req.session.userId = user.id
+        return {user}
+    }
 
     @Mutation(() => Boolean)
     async forgotPassword(@Arg("email") email:string,
