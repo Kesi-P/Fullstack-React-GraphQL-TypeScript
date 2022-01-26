@@ -2,7 +2,7 @@
 import { Blog } from "../entities/Blog";
 import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware } from "type-graphql";
 import { Mycontext } from "../types";
-import { isAuth } from "src/middleware/isAuth";
+import { isAuth } from "../middleware/isAuth";
 
 @InputType()
 class BlogInput {

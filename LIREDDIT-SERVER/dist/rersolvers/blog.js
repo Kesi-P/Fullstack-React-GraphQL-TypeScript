@@ -15,6 +15,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlogResolver = void 0;
 const Blog_1 = require("../entities/Blog");
 const type_graphql_1 = require("type-graphql");
+const isAuth_1 = require("../middleware/isAuth");
+let BlogInput = class BlogInput {
+};
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogInput.prototype, "title", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogInput.prototype, "content", void 0);
+BlogInput = __decorate([
+    (0, type_graphql_1.InputType)()
+], BlogInput);
 let BlogResolver = class BlogResolver {
     blogs({ em }) {
         return em.find(Blog_1.Blog, {});
@@ -22,8 +36,11 @@ let BlogResolver = class BlogResolver {
     blog(id, { em }) {
         return em.findOne(Blog_1.Blog, { id });
     }
-    async createBlog(title, { em }) {
-        const blog = em.create(Blog_1.Blog, { title });
+    async createBlog(input, { em, req }) {
+        if (!req.session.userId) {
+            throw new Error('Please log in');
+        }
+        const blog = em.create(Blog_1.Blog, Object.assign(Object.assign({}, input), { creator: req.session.userId }));
         await em.persistAndFlush(blog);
         return blog;
     }
@@ -60,10 +77,11 @@ __decorate([
 ], BlogResolver.prototype, "blog", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Blog_1.Blog),
-    __param(0, (0, type_graphql_1.Arg)('titleinput')),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
+    __param(0, (0, type_graphql_1.Arg)('input')),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [BlogInput, Object]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "createBlog", null);
 __decorate([
