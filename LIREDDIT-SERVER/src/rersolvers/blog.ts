@@ -1,7 +1,16 @@
 //schema is a grapsql query functions
 import { Blog } from "../entities/Blog";
-import { Resolver, Query, Ctx, Arg, Mutation } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware } from "type-graphql";
 import { Mycontext } from "../types";
+import { isAuth } from "src/middleware/isAuth";
+
+@InputType()
+class BlogInput {
+    @Field()
+    title: string
+    @Field()
+    content:string
+}
 
 @Resolver()
 export class BlogResolver {
@@ -22,10 +31,21 @@ export class BlogResolver {
 
     //Mutation for creating updating serting deleting (Chaning server)
     @Mutation(() => Blog)
+    //gonna run middleware before the mutation
+    @UseMiddleware(isAuth)
     async createBlog( 
-        @Arg('titleinput' ) title:string,
-        @Ctx() {em}: Mycontext) : Promise<Blog | null> {
-        const blog = em.create(Blog, { title })
+        @Arg('input' ) input:BlogInput,
+        @Ctx() {em, req}: Mycontext
+        ) : Promise<Blog | null> {
+         //if user not log in
+        if(!req.session.userId) {
+            throw new Error('Please log in')
+        }
+        const blog = em.create(Blog, 
+            {  ...input,
+                creator: req.session.userId
+            
+            })
         await em.persistAndFlush(blog)
         return blog
     }
