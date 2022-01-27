@@ -37,6 +37,7 @@ export class BlogResolver {
         @Arg('input' ) input:BlogInput,
         @Ctx() {em, req}: Mycontext
         ) : Promise<Blog | null> {
+        console.log(req.session.userId)
          //if user not log in
         if(!req.session.userId) {
             throw new Error('Please log in')

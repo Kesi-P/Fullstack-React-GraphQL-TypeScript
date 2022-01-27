@@ -17,10 +17,17 @@ export type Scalars = {
 
 export type Blog = {
   __typename?: 'Blog';
+  content: Scalars['String'];
   createdAt: Scalars['String'];
   id: Scalars['Float'];
+  point: Scalars['Float'];
   title: Scalars['String'];
   updatedAt: Scalars['String'];
+};
+
+export type BlogInput = {
+  content: Scalars['String'];
+  title: Scalars['String'];
 };
 
 export type FieldError = {
@@ -49,7 +56,7 @@ export type MutationChangePasswordArgs = {
 
 
 export type MutationCreateBlogArgs = {
-  titleinput: Scalars['String'];
+  input: BlogInput;
 };
 
 
@@ -119,6 +126,13 @@ export type ChangePasswordMutationVariables = Exact<{
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined, user?: { __typename?: 'User', username: string, createdAt: string, id: number } | null | undefined } };
 
+export type CreateBlogMutationVariables = Exact<{
+  input: BlogInput;
+}>;
+
+
+export type CreateBlogMutation = { __typename?: 'Mutation', createBlog: { __typename?: 'Blog', id: number, title: string, content: string, point: number, createdAt: string, updatedAt: string } };
+
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
 }>;
@@ -181,6 +195,22 @@ export const ChangePasswordDocument = gql`
 
 export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
+export const CreateBlogDocument = gql`
+    mutation createBlog($input: BlogInput!) {
+  createBlog(input: $input) {
+    id
+    title
+    content
+    point
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export function useCreateBlogMutation() {
+  return Urql.useMutation<CreateBlogMutation, CreateBlogMutationVariables>(CreateBlogDocument);
 };
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {

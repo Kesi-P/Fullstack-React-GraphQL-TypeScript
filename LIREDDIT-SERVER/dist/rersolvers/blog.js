@@ -37,6 +37,7 @@ let BlogResolver = class BlogResolver {
         return em.findOne(Blog_1.Blog, { id });
     }
     async createBlog(input, { em, req }) {
+        console.log(req.session.userId);
         if (!req.session.userId) {
             throw new Error('Please log in');
         }
