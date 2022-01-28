@@ -4,23 +4,24 @@ import { withUrqlClient } from 'next-urql';
 import router, { useRouter } from 'next/router';
 import React from 'react'
 import { InputField } from '../components/InputField';
-import { Wrapper } from '../components/Wrapper'
-import { useCreateBlogMutation } from '../generated/graphql';
+import { Layout } from '../components/Layout';
+import { useCreateBlogMutation, useMeQuery } from '../generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlCClient';
-import { toErrorMap } from '../utils/toErrorMap';
+import { useIsAuth } from '../utils/useIsAuth';
 
 const CreateBlog: React.FC<{}> = ({}) => {
     const router = useRouter()
+
+    useIsAuth()
     const [, createBlog] = useCreateBlogMutation()
     return (
-        <Wrapper variant='small'>
+        <Layout variant='small'>
          <Formik
           initialValues={{ title:"", content:"" }}
           //setErrors is a formik function
           onSubmit={async (values, {setErrors}) => {
               const response = await createBlog({input: values})
-              if (response.data.createBlog){
-                
+              if (response.data.createBlog){                
                     router.push("/")
                 }
           }}
@@ -45,7 +46,7 @@ const CreateBlog: React.FC<{}> = ({}) => {
             </Form>
           )}
         </Formik>
-        </Wrapper>
+        </Layout>
     )
 }
 
