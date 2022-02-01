@@ -16,6 +16,7 @@ exports.BlogResolver = void 0;
 const Blog_1 = require("../entities/Blog");
 const type_graphql_1 = require("type-graphql");
 const isAuth_1 = require("../middleware/isAuth");
+const core_1 = require("@mikro-orm/core");
 let BlogInput = class BlogInput {
 };
 __decorate([
@@ -30,8 +31,18 @@ BlogInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], BlogInput);
 let BlogResolver = class BlogResolver {
-    blogs({ em }) {
-        return em.find(Blog_1.Blog, {});
+    async blogs(limit, cursor, { em }) {
+        const blogs = em.createQueryBuilder(Blog_1.Blog);
+        blogs.select('*')
+            .orderBy({ createdAt: core_1.QueryOrder.ASC })
+            .limit(limit);
+        if (cursor) {
+            blogs.where({ createdAt: { $gt: new Date(parseInt(cursor)) } });
+        }
+        const knex = blogs.getKnexQuery();
+        const res = await em.getConnection().execute(knex);
+        const entities = res.map(a => em.map(Blog_1.Blog, a));
+        return entities;
     }
     blog(id, { em }) {
         return em.findOne(Blog_1.Blog, { id });
@@ -63,9 +74,11 @@ let BlogResolver = class BlogResolver {
 };
 __decorate([
     (0, type_graphql_1.Query)(() => [Blog_1.Blog]),
-    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(0, (0, type_graphql_1.Arg)("limit", () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
+    __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "blogs", null);
 __decorate([

@@ -1,5 +1,5 @@
-query Blogs{ 
- blogs
+query Blogs($limit: Int!, $cursor: String){ 
+ blogs(cursor: $cursor, limit: $limit)
     {
     id
     createdAt

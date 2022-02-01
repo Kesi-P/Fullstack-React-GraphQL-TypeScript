@@ -1,8 +1,9 @@
 //schema is a grapsql query functions
 import { Blog } from "../entities/Blog";
-import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int } from "type-graphql";
 import { Mycontext } from "../types";
 import { isAuth } from "../middleware/isAuth";
+import { QueryOrder } from "@mikro-orm/core";
 
 @InputType()
 class BlogInput {
@@ -17,8 +18,23 @@ export class BlogResolver {
     //define graphql type that gonna return
     @Query(() => [Blog])
     //define typescript type
-    blogs( @Ctx() {em}: Mycontext) : Promise<Blog[]> {
-        return em.find(Blog, {});
+    async blogs( 
+        @Arg("limit", () => Int ) limit:number,
+        @Arg('cursor', ()=>String, {nullable: true}) cursor: string | null ,
+        @Ctx() {em}: Mycontext) 
+        : Promise<Blog[]> {
+         const blogs = em.createQueryBuilder(Blog);
+           blogs.select('*')
+             .orderBy({ createdAt: QueryOrder.ASC })
+             .limit(limit)
+            if(cursor){
+                blogs.where({createdAt:{ $gt: new Date(parseInt(cursor))}   } )
+            }
+            const knex = blogs.getKnexQuery();
+            const res = await em.getConnection().execute(knex);
+            const entities = res.map(a => em.map(Blog, a));
+            //console.log(entities)
+        return entities
     }
 
     // findding a blog by taking id arg

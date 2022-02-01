@@ -1,10 +1,10 @@
-import { Connection, EntityManager, IDatabaseDriver } from "@mikro-orm/core";
+import { Connection, IDatabaseDriver } from "@mikro-orm/core";
 import { Request, Response } from "express";
 import { Redis } from "ioredis";
 import { Session, SessionData } from "express-session";
-
+import { EntityManager } from '@mikro-orm/mysql'
 export type Mycontext = {
-    em: EntityManager<IDatabaseDriver<Connection>>;
+    em: EntityManager;
     req: Request & {
         session: Session & Partial<SessionData> & { userId: number };
       };

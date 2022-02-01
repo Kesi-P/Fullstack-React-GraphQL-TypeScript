@@ -16,7 +16,11 @@ import NextLink from 'next/link'
 
 const Index = () => {
 
-  const [{ data }] = useBlogsQuery()
+  const [{ data }] = useBlogsQuery({
+    variables: {
+      limit:10
+    }
+    })
   return (
     <>
     <Layout>

@@ -101,6 +101,12 @@ export type QueryBlogArgs = {
   idinput: Scalars['Float'];
 };
 
+
+export type QueryBlogsArgs = {
+  cursor?: InputMaybe<Scalars['String']>;
+  limit: Scalars['Int'];
+};
+
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['String'];
@@ -162,7 +168,10 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, createdAt: string, id: number } };
 
-export type BlogsQueryVariables = Exact<{ [key: string]: never; }>;
+export type BlogsQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
 
 
 export type BlogsQuery = { __typename?: 'Query', blogs: Array<{ __typename?: 'Blog', id: number, createdAt: string, updatedAt: string, title: string }> };
@@ -263,8 +272,8 @@ export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
 export const BlogsDocument = gql`
-    query Blogs {
-  blogs {
+    query Blogs($limit: Int!, $cursor: String) {
+  blogs(cursor: $cursor, limit: $limit) {
     id
     createdAt
     updatedAt
