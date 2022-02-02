@@ -31,6 +31,9 @@ BlogInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], BlogInput);
 let BlogResolver = class BlogResolver {
+    textSnippet(root) {
+        return root.content.slice(0, 50);
+    }
     async blogs(limit, cursor, { em }) {
         const blogs = em.createQueryBuilder(Blog_1.Blog);
         blogs.select('*')
@@ -72,6 +75,13 @@ let BlogResolver = class BlogResolver {
         return true;
     }
 };
+__decorate([
+    (0, type_graphql_1.FieldResolver)(() => String),
+    __param(0, (0, type_graphql_1.Root)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Blog_1.Blog]),
+    __metadata("design:returntype", void 0)
+], BlogResolver.prototype, "textSnippet", null);
 __decorate([
     (0, type_graphql_1.Query)(() => [Blog_1.Blog]),
     __param(0, (0, type_graphql_1.Arg)("limit", () => type_graphql_1.Int)),
@@ -116,7 +126,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "deleteBlog", null);
 BlogResolver = __decorate([
-    (0, type_graphql_1.Resolver)()
+    (0, type_graphql_1.Resolver)(Blog_1.Blog)
 ], BlogResolver);
 exports.BlogResolver = BlogResolver;
 //# sourceMappingURL=blog.js.map

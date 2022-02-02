@@ -2,8 +2,10 @@ query Blogs($limit: Int!, $cursor: String){
  blogs(cursor: $cursor, limit: $limit)
     {
     id
+    title
+    textSnippet
+    point
     createdAt
     updatedAt
-    title
     }
 }

@@ -6,7 +6,7 @@ import { InputField } from "../components/InputField";
 import { useLoginMutation } from "../generated/graphql";
 import { useRouter } from "next/router"
 import { toErrorMap } from "../utils/toErrorMap";
-import { createUrqlClient } from "../utils/createUrqlCClient";
+import { createUrqlClient } from "../utils/createUrqlClient";
 import { withUrqlClient } from "next-urql";
 import NextLink from 'next/link'
 

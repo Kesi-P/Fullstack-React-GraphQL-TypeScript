@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { InputField } from '../../components/InputField';
 import { Wrapper } from '../../components/Wrapper';
 import { useChangePasswordMutation } from '../../generated/graphql';
-import { createUrqlClient } from '../../utils/createUrqlCClient';
+import { createUrqlClient } from '../../utils/createUrqlClient';
 import { toErrorMap } from '../../utils/toErrorMap';
 import NextLink from 'next/link'
 

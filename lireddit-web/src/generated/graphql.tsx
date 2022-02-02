@@ -21,6 +21,7 @@ export type Blog = {
   createdAt: Scalars['String'];
   id: Scalars['Float'];
   point: Scalars['Float'];
+  textSnippet: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -174,7 +175,7 @@ export type BlogsQueryVariables = Exact<{
 }>;
 
 
-export type BlogsQuery = { __typename?: 'Query', blogs: Array<{ __typename?: 'Blog', id: number, createdAt: string, updatedAt: string, title: string }> };
+export type BlogsQuery = { __typename?: 'Query', blogs: Array<{ __typename?: 'Blog', id: number, title: string, textSnippet: string, point: number, createdAt: string, updatedAt: string }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -275,9 +276,11 @@ export const BlogsDocument = gql`
     query Blogs($limit: Int!, $cursor: String) {
   blogs(cursor: $cursor, limit: $limit) {
     id
+    title
+    textSnippet
+    point
     createdAt
     updatedAt
-    title
   }
 }
     `;

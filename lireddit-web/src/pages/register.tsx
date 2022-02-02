@@ -7,7 +7,7 @@ import { useMutation } from "urql";
 import { useRegisterMutation } from "../generated/graphql";
 import { useRouter } from "next/router"
 import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlCClient";
+import { createUrqlClient } from "../utils/createUrqlClient";
 
 interface registerProps {
 

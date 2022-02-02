@@ -1,6 +1,6 @@
 //schema is a grapsql query functions
 import { Blog } from "../entities/Blog";
-import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int, FieldResolver, Root } from "type-graphql";
 import { Mycontext } from "../types";
 import { isAuth } from "../middleware/isAuth";
 import { QueryOrder } from "@mikro-orm/core";
@@ -13,8 +13,12 @@ class BlogInput {
     content:string
 }
 
-@Resolver()
+@Resolver(ฺBlog)
 export class BlogResolver {
+    @FieldResolver(() => String)
+    textSnippet(@Root() root: Blog){
+        return root.content.slice(0, 50)
+    }
     //define graphql type that gonna return
     @Query(() => [Blog])
     //define typescript type
