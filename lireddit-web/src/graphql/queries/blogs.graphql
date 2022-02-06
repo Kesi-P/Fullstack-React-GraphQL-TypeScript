@@ -1,11 +1,14 @@
 query Blogs($limit: Int!, $cursor: String){ 
  blogs(cursor: $cursor, limit: $limit)
+ {
+    hasMore
+    blogs
     {
-    id
-    title
-    textSnippet
-    point
-    createdAt
-    updatedAt
+        id
+        title
+        textSnippet
+        point
+        createdAt
+        updatedAt
     }
-}
+}}

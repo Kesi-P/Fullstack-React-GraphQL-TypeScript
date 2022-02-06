@@ -89,10 +89,16 @@ export type MutationUpdateBlogArgs = {
   titleinput?: InputMaybe<Scalars['String']>;
 };
 
+export type PaginatedBlog = {
+  __typename?: 'PaginatedBlog';
+  blogs: Array<Blog>;
+  hasMore: Scalars['Boolean'];
+};
+
 export type Query = {
   __typename?: 'Query';
   blog?: Maybe<Blog>;
-  blogs: Array<Blog>;
+  blogs: PaginatedBlog;
   hello: Scalars['String'];
   me?: Maybe<User>;
 };
@@ -175,7 +181,7 @@ export type BlogsQueryVariables = Exact<{
 }>;
 
 
-export type BlogsQuery = { __typename?: 'Query', blogs: Array<{ __typename?: 'Blog', id: number, title: string, textSnippet: string, point: number, createdAt: string, updatedAt: string }> };
+export type BlogsQuery = { __typename?: 'Query', blogs: { __typename?: 'PaginatedBlog', hasMore: boolean, blogs: Array<{ __typename?: 'Blog', id: number, title: string, textSnippet: string, point: number, createdAt: string, updatedAt: string }> } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -275,12 +281,15 @@ export function useRegisterMutation() {
 export const BlogsDocument = gql`
     query Blogs($limit: Int!, $cursor: String) {
   blogs(cursor: $cursor, limit: $limit) {
-    id
-    title
-    textSnippet
-    point
-    createdAt
-    updatedAt
+    hasMore
+    blogs {
+      id
+      title
+      textSnippet
+      point
+      createdAt
+      updatedAt
+    }
   }
 }
     `;

@@ -30,22 +30,36 @@ __decorate([
 BlogInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], BlogInput);
+let PaginatedBlog = class PaginatedBlog {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => [Blog_1.Blog]),
+    __metadata("design:type", Array)
+], PaginatedBlog.prototype, "blogs", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], PaginatedBlog.prototype, "hasMore", void 0);
+PaginatedBlog = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], PaginatedBlog);
 let BlogResolver = class BlogResolver {
     textSnippet(root) {
         return root.content.slice(0, 50);
     }
     async blogs(limit, cursor, { em }) {
+        const realLimit = Math.min(50, limit);
+        const realLimitPlusOne = realLimit + 1;
         const blogs = em.createQueryBuilder(Blog_1.Blog);
         blogs.select('*')
-            .orderBy({ createdAt: core_1.QueryOrder.ASC })
-            .limit(limit);
+            .orderBy({ createdAt: core_1.QueryOrder.ASC });
         if (cursor) {
             blogs.where({ createdAt: { $gt: new Date(parseInt(cursor)) } });
         }
         const knex = blogs.getKnexQuery();
         const res = await em.getConnection().execute(knex);
         const entities = res.map(a => em.map(Blog_1.Blog, a));
-        return entities;
+        return { blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne };
     }
     blog(id, { em }) {
         return em.findOne(Blog_1.Blog, { id });
@@ -83,7 +97,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BlogResolver.prototype, "textSnippet", null);
 __decorate([
-    (0, type_graphql_1.Query)(() => [Blog_1.Blog]),
+    (0, type_graphql_1.Query)(() => PaginatedBlog),
     __param(0, (0, type_graphql_1.Arg)("limit", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
     __param(2, (0, type_graphql_1.Ctx)()),

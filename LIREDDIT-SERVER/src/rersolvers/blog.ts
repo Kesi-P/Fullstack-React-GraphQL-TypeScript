@@ -1,6 +1,6 @@
 //schema is a grapsql query functions
 import { Blog } from "../entities/Blog";
-import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int, FieldResolver, Root } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int, FieldResolver, Root, ObjectType } from "type-graphql";
 import { Mycontext } from "../types";
 import { isAuth } from "../middleware/isAuth";
 import { QueryOrder } from "@mikro-orm/core";
@@ -13,32 +13,40 @@ class BlogInput {
     content:string
 }
 
-@Resolver(ฺBlog)
+@ObjectType()
+class PaginatedBlog{
+    @Field(() => [Blog])
+    blogs: Blog[]
+    @Field()
+    hasMore: boolean
+}
+@Resolver(Blog)
 export class BlogResolver {
     @FieldResolver(() => String)
     textSnippet(@Root() root: Blog){
         return root.content.slice(0, 50)
     }
     //define graphql type that gonna return
-    @Query(() => [Blog])
+    @Query(() => PaginatedBlog)
     //define typescript type
     async blogs( 
         @Arg("limit", () => Int ) limit:number,
         @Arg('cursor', ()=>String, {nullable: true}) cursor: string | null ,
         @Ctx() {em}: Mycontext) 
-        : Promise<Blog[]> {
+        : Promise< PaginatedBlog> {
+         const realLimit = Math.min(50, limit);
+         const realLimitPlusOne = realLimit + 1;
          const blogs = em.createQueryBuilder(Blog);
            blogs.select('*')
              .orderBy({ createdAt: QueryOrder.ASC })
-             .limit(limit)
+             //.limit(limit)
             if(cursor){
                 blogs.where({createdAt:{ $gt: new Date(parseInt(cursor))}   } )
             }
             const knex = blogs.getKnexQuery();
             const res = await em.getConnection().execute(knex);
             const entities = res.map(a => em.map(Blog, a));
-            //console.log(entities)
-        return entities
+            return {blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne }
     }
 
     // findding a blog by taking id arg
