@@ -36,17 +36,15 @@ export class BlogResolver {
         : Promise< PaginatedBlog> {
          const realLimit = Math.min(50, limit);
          const realLimitPlusOne = realLimit + 1;
-         const blogs = em.createQueryBuilder(Blog);
-           blogs.select('*')
-             .orderBy({ createdAt: QueryOrder.ASC })
-             //.limit(limit)
-            if(cursor){
-                blogs.where({createdAt:{ $gt: new Date(parseInt(cursor))}   } )
-            }
-            const knex = blogs.getKnexQuery();
-            const res = await em.getConnection().execute(knex);
-            const entities = res.map(a => em.map(Blog, a));
-            return {blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne }
+         const conn = em.getConnection()
+         const knex = conn.getKnex();
+                 
+         const test = knex.raw(`select b.*,json_build_object(
+             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" limit(1)`)
+         const res = await em.getConnection().execute(test);
+         const entities = res.map(a => em.map(Blog, a));
+            
+         return {blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne }
     }
 
     // findding a blog by taking id arg

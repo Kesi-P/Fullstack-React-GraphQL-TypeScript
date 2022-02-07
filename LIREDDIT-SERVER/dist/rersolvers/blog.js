@@ -16,7 +16,6 @@ exports.BlogResolver = void 0;
 const Blog_1 = require("../entities/Blog");
 const type_graphql_1 = require("type-graphql");
 const isAuth_1 = require("../middleware/isAuth");
-const core_1 = require("@mikro-orm/core");
 let BlogInput = class BlogInput {
 };
 __decorate([
@@ -50,14 +49,11 @@ let BlogResolver = class BlogResolver {
     async blogs(limit, cursor, { em }) {
         const realLimit = Math.min(50, limit);
         const realLimitPlusOne = realLimit + 1;
-        const blogs = em.createQueryBuilder(Blog_1.Blog);
-        blogs.select('*')
-            .orderBy({ createdAt: core_1.QueryOrder.ASC });
-        if (cursor) {
-            blogs.where({ createdAt: { $gt: new Date(parseInt(cursor)) } });
-        }
-        const knex = blogs.getKnexQuery();
-        const res = await em.getConnection().execute(knex);
+        const conn = em.getConnection();
+        const knex = conn.getKnex();
+        const test = knex.raw(`select b.*,json_build_object(
+             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" limit(1)`);
+        const res = await em.getConnection().execute(test);
         const entities = res.map(a => em.map(Blog_1.Blog, a));
         return { blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne };
     }

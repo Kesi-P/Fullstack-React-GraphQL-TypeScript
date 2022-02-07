@@ -25,7 +25,7 @@ export class Blog {
     point!: number;
 
     //the forienge id will create automatically * see blog-createblog
-
+    @Field()
     @ManyToOne({ entity: () => User }) // or use options object
     creator: User;
 

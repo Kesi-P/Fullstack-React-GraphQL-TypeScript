@@ -40,6 +40,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Blog.prototype, "point", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(),
     (0, core_1.ManyToOne)({ entity: () => User_1.User }),
     __metadata("design:type", User_1.User)
 ], Blog.prototype, "creator", void 0);
