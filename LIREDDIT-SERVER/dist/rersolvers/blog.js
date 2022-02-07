@@ -52,7 +52,7 @@ let BlogResolver = class BlogResolver {
         const conn = em.getConnection();
         const knex = conn.getKnex();
         const test = knex.raw(`select b.*,json_build_object(
-             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" limit(1)`);
+             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" `);
         const res = await em.getConnection().execute(test);
         const entities = res.map(a => em.map(Blog_1.Blog, a));
         return { blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne };
