@@ -16,6 +16,8 @@ exports.BlogResolver = void 0;
 const Blog_1 = require("../entities/Blog");
 const type_graphql_1 = require("type-graphql");
 const isAuth_1 = require("../middleware/isAuth");
+const core_1 = require("@mikro-orm/core");
+const Updoot_1 = require("../entities/Updoot");
 let BlogInput = class BlogInput {
 };
 __decorate([
@@ -46,13 +48,25 @@ let BlogResolver = class BlogResolver {
     textSnippet(root) {
         return root.content.slice(0, 50);
     }
+    async vote(postId, value, { req, em }) {
+        const isUpdoot = value !== -1;
+        const realValue = isUpdoot ? 1 : -1;
+        const { userId } = req.session;
+        await em.nativeInsert(Updoot_1.Updoot, { user_id: 97, blog_id: postId, value: realValue });
+        const existing = await em.findOneOrFail(Blog_1.Blog, { id: postId });
+        const to_save = (0, core_1.wrap)(existing).assign({ points: realValue });
+        await em.persistAndFlush(to_save);
+        return true;
+    }
     async blogs(limit, cursor, { em }) {
         const realLimit = Math.min(50, limit);
         const realLimitPlusOne = realLimit + 1;
         const conn = em.getConnection();
         const knex = conn.getKnex();
-        const test = knex.raw(`select b.*,json_build_object(
-             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" `);
+        const test = knex.raw(`select b.*,json_build_object('id',u.id,'username',u.username,'email', u.email) creator 
+             from blog b left join public.user u on u.id = b.creator_id  
+             ${cursor ? "where b.created_at < ' " + new Date(parseInt(cursor)).toISOString().slice(0, 10) + "' " : ''} 
+             order by b.created_at DESC `);
         const res = await em.getConnection().execute(test);
         const entities = res.map(a => em.map(Blog_1.Blog, a));
         return { blogs: entities.slice(0, realLimit), hasMore: entities.length === realLimitPlusOne };
@@ -92,6 +106,15 @@ __decorate([
     __metadata("design:paramtypes", [Blog_1.Blog]),
     __metadata("design:returntype", void 0)
 ], BlogResolver.prototype, "textSnippet", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Arg)('postId', () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Arg)('value', () => type_graphql_1.Int)),
+    __param(2, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, Object]),
+    __metadata("design:returntype", Promise)
+], BlogResolver.prototype, "vote", null);
 __decorate([
     (0, type_graphql_1.Query)(() => PaginatedBlog),
     __param(0, (0, type_graphql_1.Arg)("limit", () => type_graphql_1.Int)),

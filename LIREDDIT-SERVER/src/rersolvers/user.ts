@@ -1,7 +1,7 @@
 //schema is a grapsql query functions
 import { User } from "../entities/User";
 import { Mycontext } from "../types";
-import { Resolver, Mutation, Arg, Ctx, InputType, Field, ObjectType, Query } from "type-graphql";
+import { Resolver, Mutation, Arg, Ctx, InputType, Field, ObjectType, Query, FieldResolver, Root } from "type-graphql";
 import passwordHash  from 'password-hash'
 import { COOKIE_NAME, FORGOT_PASSWORD } from "../constants";
 import { sendEmail } from "../utils/sendEmail";
@@ -33,8 +33,17 @@ class UserResponse {
     @Field(() => User, {nullable: true})
     user?: User;
 }
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+    //only the owner can see thier email
+    @FieldResolver(() => String)
+    email(@Root() user: User, @Ctx() { req }: Mycontext){
+        if(req.session.userId === user.id){
+            return user.email
+        }
+        //onerther user
+        return "";
+    }
     @Mutation(() => UserResponse)
     async changePassword(
         @Arg('token') token: string,

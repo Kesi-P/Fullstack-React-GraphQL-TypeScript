@@ -1,8 +1,9 @@
 // Mikro-Orm Classes and Decorators
 // Create column into the DB
 
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
+import { Updoot } from "./Updoot";
 import { User } from "./User";
 
 @ObjectType()
@@ -28,6 +29,9 @@ export class Blog {
     @Field()
     @ManyToOne({ entity: () => User }) // or use options object
     creator: User;
+    
+    @OneToMany(() => Updoot, updoot => updoot.blog)
+    updoots = new Collection<Updoot>(this);
 
     @Field( () => String)
     @Property({ type: "date"})

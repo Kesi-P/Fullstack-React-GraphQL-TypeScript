@@ -3,7 +3,8 @@ import { Blog } from "../entities/Blog";
 import { Resolver, Query, Ctx, Arg, Mutation, InputType, Field, UseMiddleware, Int, FieldResolver, Root, ObjectType } from "type-graphql";
 import { Mycontext } from "../types";
 import { isAuth } from "../middleware/isAuth";
-import { QueryOrder } from "@mikro-orm/core";
+import { QueryOrder, wrap } from "@mikro-orm/core";
+import { Updoot } from "../entities/Updoot";
 
 @InputType()
 class BlogInput {
@@ -26,6 +27,25 @@ export class BlogResolver {
     textSnippet(@Root() root: Blog){
         return root.content.slice(0, 50)
     }
+
+    @Mutation(() => Boolean)
+    //@UseMiddleware(isAuth)
+    async vote(
+        @Arg('postId', () => Int) postId: number,
+        @Arg('value', () => Int) value: number,
+        @Ctx() {req, em}: Mycontext
+    ){
+        const isUpdoot = value !== -1;
+        const realValue = isUpdoot ? 1 : -1;
+        const { userId } = req.session
+
+        await em.nativeInsert(Updoot, { user_id:97, blog_id:postId, value: realValue });
+        const existing = await em.findOneOrFail(Blog, {id: postId})
+        const to_save = wrap(existing).assign({points: realValue})
+        await em.persistAndFlush(to_save)
+        
+        return true
+    }
     //define graphql type that gonna return
     @Query(() => PaginatedBlog)
     //define typescript type
@@ -39,8 +59,10 @@ export class BlogResolver {
          const conn = em.getConnection()
          const knex = conn.getKnex();
                  
-         const test = knex.raw(`select b.*,json_build_object(
-             'id',u.id,'username',u.username,'email', u.email) creator from blog b left join public.user u on u.id = b."creator_id" `)
+         const test = knex.raw(`select b.*,json_build_object('id',u.id,'username',u.username,'email', u.email) creator 
+             from blog b left join public.user u on u.id = b.creator_id  
+             ${cursor ? "where b.created_at < ' " + new Date(parseInt(cursor)).toISOString().slice(0,10) + "' "  : ''} 
+             order by b.created_at DESC `)
          const res = await em.getConnection().execute(test);
          const entities = res.map(a => em.map(Blog, a));
             

@@ -13,9 +13,11 @@ exports.User = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const Blog_1 = require("./Blog");
+const Updoot_1 = require("./Updoot");
 let User = class User {
     constructor() {
         this.blog = new core_1.Collection(this);
+        this.updoots = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -43,6 +45,10 @@ __decorate([
     (0, core_1.OneToMany)(() => Blog_1.Blog, blog => blog.creator),
     __metadata("design:type", Object)
 ], User.prototype, "blog", void 0);
+__decorate([
+    (0, core_1.OneToMany)(() => Updoot_1.Updoot, updoot => updoot.user),
+    __metadata("design:type", Object)
+], User.prototype, "updoots", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: "date" }),

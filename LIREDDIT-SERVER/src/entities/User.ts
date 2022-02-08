@@ -1,6 +1,7 @@
 import { Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 import { Blog } from "./Blog";
+import { Updoot } from "./Updoot";
 
 @ObjectType()
 @Entity()
@@ -22,6 +23,9 @@ export class User {
 
     @OneToMany(() => Blog, blog => blog.creator)
     blog = new Collection<Blog>(this);
+
+    @OneToMany(() => Updoot, updoot => updoot.user)
+    updoots = new Collection<Updoot>(this);
 
     @Field( () => String)
     @Property({ type: "date"})
